@@ -1,4 +1,5 @@
 import pygame
+import bfs
 
 
 BLACK = (0, 0, 0)
@@ -22,6 +23,7 @@ class Grid:
         self.vcount = kwargs.get('vcount', 20)
         self.hcount = kwargs.get('hcount', 20)
         self.margin = kwargs.get('margin', 5)
+        self.total_nodes = 0
         self.idToPos = {}
         self.posTOId = {}
         self.adjacency_list = {}
@@ -37,6 +39,7 @@ class Grid:
                 self.posTOId[(row, col)] = id
                 id += 1
                 grid[row].append(0)
+        self.total_nodes = id - 1
         self.createAdjecencyList()
         return grid
 
@@ -56,7 +59,14 @@ class Grid:
                     self.adjacency_list[id].append(self.posTOId[(row+1, col)])
 
 
-    def redraw(self):
+    def redraw(self, *args, **kwargs):
+        path = kwargs.get('path', None)
+        if path:
+            for id in path:
+                i = self.idToPos[id][0]
+                j = self.idToPos[id][1]
+                grid[i][j] = 1
+
         # Draw the grid
         for row in range(self.vcount):
             for column in range(self.hcount):
@@ -71,14 +81,21 @@ class Grid:
                                   self.block_height])
 
 
+
 gridobj = Grid(window_width=510, window_height=510, block_height=20, block_width=20, hcount=20, vcount=20)
 grid = gridobj.creategrid()
+bfsobj = bfs.Bfs(adjacency_list=gridobj.adjacency_list, total_nodes=gridobj.total_nodes)
+
 
 
 # -------- Main Program Loop -----------
 done = False
+firstClick = None
+secondClick = None
+
 while not done:
     for event in pygame.event.get():
+        path = None
         if event.type == pygame.QUIT:
             done = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -87,9 +104,18 @@ while not done:
             row = pos[1] // (gridobj.block_height + gridobj.margin)
             grid[row][col] = 1
             id = gridobj.posTOId[(row, col)]
-            print("Click ", pos, "Grid coordinates: ", row, col, 'ids', id , gridobj.adjacency_list[id])
+            if not firstClick:
+                firstClick = id
+            else:
+                if not secondClick:
+                    secondClick = id
+                else:
+                    firstClick = secondClick
+                    secondClick = id
+                path = bfsobj.shortestPath(firstClick, secondClick)
+                print('start: ', firstClick, 'second: ', secondClick, 'path: ', path)
     screen.fill(BLACK)
-    gridobj.redraw()
+    gridobj.redraw(path=path)
     clock.tick(60)
     pygame.display.flip()
 
