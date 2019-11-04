@@ -1,14 +1,11 @@
 
-
 class Bfs:
     def __init__(self, *args, **kwargs):
         self.adjacency_list = kwargs.get('adjacency_list', None)
         self.total_nodes = kwargs.get('total_nodes', 0)
 
-
-    def shortestPath(self, start, end):
+    def shortestpath(self, start, end):
         queue = []
-        print('total = ', self.total_nodes)
         visited = [-1] * (self.total_nodes + 1)
         queue.append(start)
         visited[start] = start

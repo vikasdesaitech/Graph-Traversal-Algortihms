@@ -6,6 +6,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+PINK = (244, 194, 194)
 
 pygame.init()
 WINDOW_SIZE = [510, 510]
@@ -28,8 +29,7 @@ class Grid:
         self.posTOId = {}
         self.adjacency_list = {}
 
-
-    def creategrid(self):
+    def create_grid(self):
         grid = []
         id = 1
         for row in range(self.vcount):
@@ -40,11 +40,10 @@ class Grid:
                 id += 1
                 grid[row].append(0)
         self.total_nodes = id - 1
-        self.createAdjecencyList()
+        self.create_adjecency_list()
         return grid
 
-
-    def createAdjecencyList(self):
+    def create_adjecency_list(self):
         for row in range(self.vcount):
             for col in range(self.hcount):
                 id = self.posTOId[(row, col)]
@@ -57,7 +56,6 @@ class Grid:
                     self.adjacency_list[id].append(self.posTOId[(row, col+1)])
                 if row < self.vcount - 1:
                     self.adjacency_list[id].append(self.posTOId[(row+1, col)])
-
 
     def redraw(self, *args, **kwargs):
         path = kwargs.get('path', None)
@@ -73,6 +71,8 @@ class Grid:
                 color = WHITE
                 if grid[row][column] == 1:
                     color = GREEN
+                if grid[row][column] == 2:
+                    color = PINK
                 pygame.draw.rect(screen,
                                  color,
                                  [(self.margin + self.block_width) * column + self.margin,
@@ -81,11 +81,9 @@ class Grid:
                                   self.block_height])
 
 
-
 gridobj = Grid(window_width=510, window_height=510, block_height=20, block_width=20, hcount=20, vcount=20)
-grid = gridobj.creategrid()
+grid = gridobj.create_grid()
 bfsobj = bfs.Bfs(adjacency_list=gridobj.adjacency_list, total_nodes=gridobj.total_nodes)
-
 
 
 # -------- Main Program Loop -----------
@@ -112,7 +110,7 @@ while not done:
                 else:
                     firstClick = secondClick
                     secondClick = id
-                path = bfsobj.shortestPath(firstClick, secondClick)
+                path = bfsobj.shortestpath(firstClick, secondClick)
                 print('start: ', firstClick, 'second: ', secondClick, 'path: ', path)
     screen.fill(BLACK)
     gridobj.redraw(path=path)
